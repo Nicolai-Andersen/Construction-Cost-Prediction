@@ -18,6 +18,12 @@ C-Mixup addresses this by preferentially pairing samples with similar labels. A 
 This approach has three key advantages over vanilla Mixup for regression: it improves in-distribution generalization by avoiding nonsensical interpolated labels, it improves out-of-distribution robustness by mixing across domains without requiring domain annotations, and it is computationally efficient since the kernel operates in label space rather than feature space.
 
 ## IBUG
+Contribution by Simen Bugge
+Implementation in *IBUG.ipynb*
+
+IBUG (Instance-Based Uncertainty estimation for gradient-Boosted regression trees - GBRTs) is designed to extend functionality of a GBRT by adding probabilistic predictions. A normal GBRT only outputs a single value, it does not show how sure it is of this value. By creating a distribution around each prediction 
+
+How IBUG works is that it takes the structure of a trained tree to find similarities.In a descision tree the data is split into groups until the most "similiar" input data end up in the same leaf (final node). Each input is passed through the decision tree many times, IBUG looks for input data that end up in the same leaf across many trees. Based on this information it can make an estimation of the uncertainty of the model. 
 
 ## RegBN
 Contribution by Lyder Samnøy
@@ -30,9 +36,9 @@ Because RegBN requires the use of pytorch with CUDA-support to be installed, the
 
 The methodology for implementing RegBN is found in the paper.
 
-Our results from integrating RegBN into the model pipeline show that almost no features in our datasets are actually linearly dependent, leading to only a small change in model preformance. As the change was a slight increase in loss and not a decrease, RegBN is not used in the main implementation in this paper. First and foremost; this shows us that our datasets are already quite robust, with few dependent or confounding features. 
+Our results from integrating RegBN into the model pipeline show that confounding effects only have a small effect on overall model performance, with an average increase in loss of 1.3 percentage points across the four models tested from table 1. For the full model, the difference in percentage point score was 1.6, representing a 8% total increase in loss. As the RegBN results show a slight increase in loss as opposed to a decrease, RegBN is not used in the main implementation in this paper.
 **Why did RegBN decrease model preformance?**
-RegBN removes confounding effects in data. Naturally, this is most beneficial when such effects are detrimental to the prediction. For example, a model that classifies animals mught mislabel a wolf as a dog if that dog happens to be in snowy environment etc. However for our construction cost prediction, confounding effects likely have a positive effect on model performance, as they affect the regression head directly. Dependencies between economic and satellite data are likely a real signal more often than a spurrious one. 
+RegBN removes confounding effects in data. Naturally, this is most beneficial when such effects are detrimental to the model prediction. For example, a model that classifies animals mught mislabel a wolf as a dog if that dog happens to be in snowy environment etc. However for our construction cost prediction, confounding effects likely have a positive effect on model performance, as they likely affect the regression head directly. Dependencies between economic and satellite data are likely a real signal more often than a spurrious one. When RegBN transforms the latent space to remove these confounders, model performance decreases.
 
 Below are some validation results from *RegBN_Implementation.ipynb*. For illustration, these results are only from the full model:
 
@@ -59,7 +65,7 @@ Below are some validation results from *RegBN_Implementation.ipynb*. For illustr
 | **target_gap_change** | -2573.82 |
 | **prediction_alignment** | improved |
 
-Note how *tab_change* and *img_change* both show large changes in the data despite a difference in loss of only 1.3% on average. This is caused by the transformations to the latent embeddings computed by the Projection Matrix; Although many features show change, they are likely minute changes of position that RegBN then further regularizes. The rest of the datapoints were an attempt to inspect changes in the data. However, the major problem here is that these metrics are not a comparison against our original model. This is all done inside the RegBN-trained model, with and without the RegBN step. This means that the downstream head is expecting RegBN-adjusted embeddings, breaking any semblance of callibration. Thus, the "before" values are wildly inaccurate, they can only show us that RegBN improves performance in the model it already used to train, which is expected. These validation results by themselves would not indicate a 1.3% performance difference.
+Note how *tab_change* and *img_change* both show large changes in the data despite a difference in loss of only 1.3% on average. This is caused by the transformations to the latent embeddings computed by the Projection Matrix; Although many features show change, they are likely minute changes of position that RegBN then further regularizes. The rest of the datapoints were an attempt to inspect changes in the data. However, the major problem here is that these metrics are not a comparison against our original model. This is all done inside the RegBN-trained model, with and without the RegBN step. This means that the downstream head is expecting RegBN-adjusted embeddings, breaking any semblance of callibration. Thus, the "before" values are wildly inaccurate, they can only show us that RegBN improves performance in the model that already used it while trainig, which is expected. These validation results by themselves would not indicate a 1.3% performance difference.
 
-In conclusion. RegBN is proven to be a valuable tool for normalizing and regularizing multimodal data, but only for domains where confounding effects are inherently disruptive. This appears not to be the case for our project domain. As mentioned above; dependent features likely have a positive effect on model performance as these correlations projected out by RegBN seem to have had a direct and positive effect on the final regression result, as noted by the marginally greater performance of the original model.
+In conclusion. RegBN is proven to be a valuable tool for normalizing and regularizing multimodal data, but only for domains where confounding effects are inherently disruptive. This appears not to be the case for our project domain. As mentioned above; dependent features likely have a positive effect on model performance as these confounders projected out by RegBN seem to have had a direct and positive effect on the final regression result, as noted by the marginally greater performance of the original model.
 
