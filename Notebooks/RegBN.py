@@ -103,6 +103,7 @@ class RegBN(nn.Module):
                 f_layer_dim: List[Sequence[int]] = None,
                 g_layer_dim: List[Sequence[int]] = None,
                 gpu: int = 0,
+                device: Union[str, torch.device, None] = None,
                 beta1: float = 0.9, 
                 beta2: float = 0.99,
                 momentum: float = 0.02,
