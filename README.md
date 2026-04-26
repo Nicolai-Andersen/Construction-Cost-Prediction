@@ -11,6 +11,8 @@ This is the part of the project where each member of the group did their own imp
 ## C-Mixup
 By Nicolai Ramsvik Andersen
 
+Full implementation found in *C-Mixup.ipynb*
+
 C-Mixup is a variant of the Mixup data augmentation technique designed to improve the generalization of regression models by creating synthetic training examples. Traditional Mixup generates synthetic samples by randomly interpolating pairs of training examples and their labels. This can produce arbitrarily incorrect labels in regression settings, where the label space is continuous mixing two samples with very different labels yields a synthetic label that may not correspond to any plausible real-world value.
 
 C-Mixup addresses this by preferentially pairing samples with similar labels. A pairwise label-distance matrix is computed once before training using a Gaussian kernel, giving each sample a probability distribution over mixing partners. Samples with closer label values are assigned higher probability of being selected as a pair. For each training step, a batch of real samples is drawn, each sample's mixing partner is sampled from this distribution, and the interpolation ratio λ is drawn from a Beta(α, α) distribution. The two samples including their tabular features, satellite image embeddings, and label are then linearly interpolated to produce a synthetic training example. The model is trained exclusively on these synthetic examples, and the process repeats each epoch.
