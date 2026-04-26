@@ -18,6 +18,12 @@ C-Mixup addresses this by preferentially pairing samples with similar labels. A 
 This approach has three key advantages over vanilla Mixup for regression: it improves in-distribution generalization by avoiding nonsensical interpolated labels, it improves out-of-distribution robustness by mixing across domains without requiring domain annotations, and it is computationally efficient since the kernel operates in label space rather than feature space.
 
 ## IBUG
+Contribution by Simen Bugge
+Implementation in *IBUG.ipynb*
+
+IBUG (Instance-Based Uncertainty estimation for gradient-Boosted regression trees - GBRTs) is designed to extend functionality of a GBRT by adding probabilistic predictions. A normal GBRT only outputs a single value, it does not show how sure it is of this value. By creating a distribution around each prediction 
+
+How IBUG works is that it takes the structure of a trained tree to find similarities.In a descision tree the data is split into groups until the most "similiar" input data end up in the same leaf (final node). Each input is passed through the decision tree many times, IBUG looks for input data that end up in the same leaf across many trees. Based on this information it can make an estimation of the uncertainty of the model. 
 
 ## RegBN
 Contribution by Lyder Samnøy
